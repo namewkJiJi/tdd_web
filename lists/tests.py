@@ -5,11 +5,10 @@ from lists.views import home_page
 
 class HomePageTest(TestCase):
 
-    # 解析根目录，验证根路由解析的view是否是规定好的home_page函数
-    # 如果根路由无法到home_page,可能是urls文件出现问题
-    def test_root_url_resolves_to_home_page_view(self):
-        found = resolve('/')
-        self.assertEqual(found.func,home_page)
+    # 测试根路由是不是 home.html渲染网页
+    def test_uses_home_template(self):
+        response = self.client.get("/")
+        self.assertTemplateUsed(response,"home.html")
 
     def test_home_page_return_correct_html(self):
         request = HttpRequest()
