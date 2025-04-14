@@ -3,8 +3,9 @@ from selenium import webdriver
 import unittest
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from django.test import LiveServerTestCase
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser=webdriver.Chrome()
     def tearDown(self):
@@ -16,7 +17,7 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn(row_text,[row.text for row in rows])
 
     def test_start_a_list_retrieve_later(self):
-        self.browser.get("http://localhost:8000")
+        self.browser.get(self.live_server_url)
 
         # 网页的标题和头部都包含to-do这个词
         self.assertIn('To-Do',self.browser.title),"Browser title was: "+self.browser.title
@@ -48,7 +49,3 @@ class NewVisitorTest(unittest.TestCase):
         self.check_for_row_in_list_table("2: give a gift to Lisi")
 
         self.fail("Finish the test!")
-
-
-if __name__ == '__main__':
-    unittest.main()
