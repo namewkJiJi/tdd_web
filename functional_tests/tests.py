@@ -60,3 +60,42 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table("2: give a gift to Lisi")
 
         self.fail("Finish the test!")
+
+
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        self.browser.get(self.live_server_url)
+        input_box = self.browser.find_element(By.ID, "id_new_item")
+        input_box.send_keys("buy flowers")
+        input_box.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table("1: buy flowers")
+
+        # 清单有一个唯一的url
+        zhangsan_list_url = self.browser.current_url
+        self.assertRegex(zhangsan_list_url,'/lists/.+')
+
+        # 现在一个新用户访问网站
+        self.browser.quit()
+        self.browser = webdriver.Chrome()
+        # 新用户访问首页，看不到之前用户的清单
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element(By.TAG_NAME,'body').text
+        self.assertNotIn('buy flowers',page_text)
+        self.assertNotIn('give a gift to Lisi',page_text)
+
+        # 新用户输入一个新的待办事项，新建一个清单
+        input_box = self.browser.find_element(By.ID, "id_new_item")
+        input_box.send_keys("buy milk")
+        input_box.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table("1: buy milk")
+
+        # 王五获得了为一个url
+        wangwu_list_url = self.browser.current_url
+        self.assertRegex(wangwu_list_url,'/lists/.+')
+        self.assertNotEqual(zhangsan_list_url,wangwu_list_url)
+
+        # 这个页面还是没有张三的清单
+        page_text = self.browser.find_element(By.TAG_NAME,'body').text
+        self.assertNotIn('buy flowers',page_text)
+        self.assertIn('buy milk',page_text)
+
+        self.fail("Finish the test!")
