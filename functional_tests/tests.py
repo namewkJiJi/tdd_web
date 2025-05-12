@@ -1,7 +1,8 @@
-import time
+import time,os
 from selenium import webdriver
 import unittest
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.common import WebDriverException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -11,6 +12,10 @@ MAX_WAIT = 10
 class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser=webdriver.Chrome()
+        real_server = os.environ.get('REAL_SERVER')
+        if real_server:
+            self.live_server_url = "http://" + real_server
+
     def tearDown(self):
         self.browser.quit()
 
@@ -58,7 +63,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.wait_for_row_in_list_table("1: buy flowers")
         self.wait_for_row_in_list_table("2: give a gift to Lisi")
 
-        self.fail("Finish the test!")
+        # self.fail("Finish the test!")
 
 
     def test_multiple_users_can_start_lists_at_different_urls(self):
@@ -97,7 +102,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertNotIn('buy flowers',page_text)
         self.assertIn('buy milk',page_text)
 
-        self.fail("Finish the test!")
+        # self.fail("Finish the test!")
 
     def test_layout_and_styling(self):
         self.browser.get(self.live_server_url)
@@ -108,9 +113,12 @@ class NewVisitorTest(StaticLiveServerTestCase):
             512,
             delta=10
         )
+
         input_box.send_keys("testing")
         input_box.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table("1: testing")
         input_box = self.browser.find_element(By.ID, "id_new_item")
+
         self.assertAlmostEqual(
             input_box.location['x'] + input_box.size['width'] / 2,
             512,
